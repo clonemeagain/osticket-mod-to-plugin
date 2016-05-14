@@ -1,0 +1,75 @@
+From 2c6afd10033a069a2b4dd85e015ccc9db6fc4e9c Mon Sep 17 00:00:00 2001
+From: Aaron <clonemeagain@gmail.com>
+Date: Sat, 14 May 2016 12:19:00 +1000
+Subject: [PATCH] Creating InvoiceNumber in tickets.php
+
+---
+ include/class.ticket.php | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/include/class.ticket.php b/include/class.ticket.php
+index f72b633..708c4b1 100644
+--- a/include/class.ticket.php
++++ b/include/class.ticket.php
+@@ -218,6 +218,9 @@ class Ticket {
+     }
+ 
+     //Getters
++    function getInvoiceNumber(){
++    	return $this->ht['invNo'];
++    }
+     function getId() {
+         return  $this->id;
+     }
+@@ -388,6 +391,7 @@ class Ticket {
+                             Misc::db2gmtime($this->getDueDate()))
+                         :'',
+                     'time'  =>  $this->getDueDate()?(Format::userdate('G:i', Misc::db2gmtime($this->getDueDate()))):'',
++        		    'invNo' => $this->getInvoiceNumber(),
+                     );
+ 
+         return $info;
+@@ -2095,6 +2099,8 @@ class Ticket {
+ 
+         $fields['note']     = array('type'=>'text',     'required'=>1, 'error'=>__('A reason for the update is required'));
+         $fields['user_id']  = array('type'=>'int',      'required'=>0, 'error'=>__('Invalid user-id'));
++        
++        $fields['invNo'] 	= array('type'=>'int', 		'required'=>0,'error' => 'Invoice Number Required'); // Well, it's not, but if it was, this is where it would be set.
+ 
+         if(!Validator::process($fields, $vars, $errors) && !$errors['err'])
+             $errors['err'] = __('Missing or invalid data - check the errors and try again');
+@@ -2127,6 +2133,7 @@ class Ticket {
+             .' ,topic_id='.db_input($vars['topicId'])
+             .' ,sla_id='.db_input($vars['slaId'])
+             .' ,source='.db_input($vars['source'])
++            .' ,invNo='.db_input($vars['invNo'])
+             .' ,duedate='.($vars['duedate']?db_input(date('Y-m-d G:i',Misc::dbtime($vars['duedate'].' '.$vars['time']))):'NULL');
+ 
+         if($vars['user_id'])
+@@ -2201,6 +2208,23 @@ class Ticket {
+ 
+         return $id;
+     }
++    
++    /**
++     * Find a ticket by it's invoice number.
++     * @param int $number
++     * @return number|NULL|unknown|string
++     */
++	function lookupByInvoiceNumber($number) {
++		if (! $number)
++			return 0;
++		
++		$sql = 'SELECT ticket.ticket_id FROM ' . TICKET_TABLE . ' ticket ' . ' WHERE ticket.`invNo`=' . db_input ( $number );
++		
++		if (($res = db_query ( $sql )) && db_num_rows ( $res ))
++			list ( $id ) = db_fetch_row ( $res );
++		
++		return $id;
++	}
+ 
+ 
+ 
+-- 
+2.7.2.windows.1
+
