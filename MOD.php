@@ -124,7 +124,7 @@ abstract class AbstractFix {
 			// First, let's get the file in question.
 			$file = $this->read ( $this->file );
 			// Undo our fix
-			$fixed = str_replace ( $this->replace, $this->find, $file );
+			$fixed = $this->method ( $this->replace, $this->find, $file );
 			// Write it back out
 			$this->write ( $this->file, $fixed );
 		} catch ( Exception $e ) {
