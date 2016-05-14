@@ -1,0 +1,57 @@
+From 794cc8f596cfa781733a07feb2236759c5a6ce6c Mon Sep 17 00:00:00 2001
+From: Aaron <clonemeagain@gmail.com>
+Date: Sat, 14 May 2016 15:50:30 +1000
+Subject: [PATCH] fearless patch from nov2014
+
+---
+ include/class.ticket.php      | 7 +++----
+ include/staff/tickets.inc.php | 7 ++++++-
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/include/class.ticket.php b/include/class.ticket.php
+index f72b633..6181679 100644
+--- a/include/class.ticket.php
++++ b/include/class.ticket.php
+@@ -178,10 +178,6 @@ class Ticket {
+                 && $staff->canAccessDept($this->getDeptId()))
+             return true;
+ 
+-        // Only consider assignment if the ticket is open
+-        if (!$this->isOpen())
+-            return false;
+-
+         // Check ticket access based on direct or team assignment
+         if ($staff->getId() == $this->getStaffId()
+                 || ($this->getTeamId()
+@@ -2255,6 +2251,9 @@ class Ticket {
+ 
+         if(!$staff->showAssignedOnly() && ($depts=$staff->getDepts())) //Staff with limited access just see Assigned tickets.
+             $where[] = 'ticket.dept_id IN('.implode(',', db_input($depts)).') ';
++        
++        if ($staff->showAssignedOnly())
++            $where[] = '(ticket.staff_id='.db_input($staff->getId()).' AND status.state="closed")';
+ 
+         if(!$cfg || !($cfg->showAssignedTickets() || $staff->showAssignedTickets()))
+             $where2 =' AND ticket.staff_id=0 ';
+diff --git a/include/staff/tickets.inc.php b/include/staff/tickets.inc.php
+index 5f436a0..3591be5 100644
+--- a/include/staff/tickets.inc.php
++++ b/include/staff/tickets.inc.php
+@@ -68,8 +68,13 @@ $qwhere =' WHERE ( '
+         .'  ( ticket.staff_id='.db_input($thisstaff->getId())
+         .' AND status.state="open") ';
+ 
+-if(!$thisstaff->showAssignedOnly())
++if(!$thisstaff->showAssignedOnly()){
+     $qwhere.=' OR ticket.dept_id IN ('.($depts?implode(',', db_input($depts)):0).')';
++}elseif($status == 'closed'){
++	// We wish to show all tickets that were previously assigned to this Agent but are now closed. 
++	// So we replace the original $qwhere, and we don't need to set status.state=closed, as that happens again below.. for some reason.
++	$qwhere =' WHERE ticket.staff_id='.db_input($thisstaff->getId());
++}
+ 
+ if(($teams=$thisstaff->getTeams()) && count(array_filter($teams)))
+     $qwhere.=' OR (ticket.team_id IN ('.implode(',', db_input(array_filter($teams)))
+-- 
+2.7.2.windows.1
+

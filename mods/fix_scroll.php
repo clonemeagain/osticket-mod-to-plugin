@@ -8,13 +8,21 @@
 class FixScroll extends MOD {
 	public function __construct() {
 		
-		// Build our fix. 
+		// Which version of code do we support?
+		$this->versions = array (
+				1.6,
+				1.7,
+				1.8,
+				1.9 
+		);
+		
+		// Build our fix.
 		$fix = new StrFix ();
 		$fix->file = '/scp/js/scp.js';
 		$fix->find = '$("input:not(.dp):visible:enabled:first").focus();';
 		$fix->replace = '// ' . $this->find;
 		
 		// Persist the fix.
-		$this->fixes[] = $fix;
+		$this->fixes [] = $fix;
 	}
 }

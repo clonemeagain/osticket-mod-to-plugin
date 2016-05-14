@@ -15,6 +15,11 @@
  */
 class InvoiceNumber extends MOD {
 	public function __construct() {
+		$this->versions = array (
+				1.7,
+				1.8,
+				1.9
+		);
 		foreach ( glob ( dirname ( __FILE__ ) . '/invoice_patches/*.patch' ) as $patch ) {
 			$this->fixes [] = new GitFix ( $patch );
 		}

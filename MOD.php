@@ -15,6 +15,7 @@ abstract class MOD {
 	 * @var array[Fix]
 	 */
 	protected $fixes;
+	protected $versions;
 	abstract public function install();
 	abstract public function uninstall();
 	
@@ -22,6 +23,18 @@ abstract class MOD {
 	 * Applies a fix
 	 */
 	protected function apply() {
+		$v = preg_replace ( '/^[0-9\.]+/', '', THIS_VERSION );
+		if (! in_array ( $v, $this->versions )) {
+			// Attempting to find different versions of patch.
+			if (isset ( $this->fixes [$v] )) {
+				foreach ( $this->fixes as $version => $fix ) {
+					if ($version == $v) {
+						$fix->apply ();
+					}
+				}
+				return;
+			}
+		}
 		foreach ( $this->fixes as $fix ) {
 			$fix->apply ();
 		}
@@ -31,6 +44,19 @@ abstract class MOD {
 	 * Applies the reverse operation to the fix.
 	 */
 	protected function undo() {
+		$v = preg_replace ( '/^[0-9\.]+/', '', THIS_VERSION );
+		if (! in_array ( $v, $this->versions )) {
+			// Attempting to find different versions of patch.
+			if (isset ( $this->fixes [$v] )) {
+				foreach ( $this->fixes as $version => $fix ) {
+					if ($version == $v) {
+						$fix->undo ();
+					}
+				}
+				return;
+			}
+		}
+		// Rely on simple method.
 		foreach ( $this->fixes as $fix ) {
 			$this->undo ();
 		}
@@ -43,6 +69,7 @@ abstract class MOD {
  * Used in class MOD
  */
 abstract class AbstractFix {
+	var $version;
 	var $file;
 	var $find;
 	var $replace;
@@ -163,8 +190,7 @@ class RegexFix extends Fix {
 class GitFix extends Fix {
 	var $patch;
 	var $method = 'git';
-	
-	public function __construct($patch_file){
+	public function __construct($patch_file) {
 		$this->patch = $patch_file;
 	}
 	
