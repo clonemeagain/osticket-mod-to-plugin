@@ -138,7 +138,7 @@ abstract class AbstractFix {
 			}
 		} catch ( Exception $e ) {
 			global $ost;
-			$ost->logError ( "MOD FixScroll Install Error", $e->getMessage () );
+			$ost->logError ( "MOD Install Error", $e->getMessage () );
 		}
 	}
 	

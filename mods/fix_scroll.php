@@ -8,19 +8,26 @@
 class FixScroll extends MOD {
 	public function __construct() {
 		
-		// Which version of code do we support?
+		// Which versions do we support?
 		$this->versions = array (
 				1.6,
 				1.7,
 				1.8,
 				1.9 
 		);
+		/**
+		 * 1.10 is: Which I haven't tried.. 
+		 * $("input[autofocus]:visible:enabled:first").each(function() {
+		 * if ($(this).val())
+		 * $(this).blur();
+		 * });
+		 */
 		
 		// Build our fix.
 		$fix = new StrFix ();
 		$fix->file = '/scp/js/scp.js';
 		$fix->find = '$("input:not(.dp):visible:enabled:first").focus();';
-		$fix->replace = '// ' . $this->find;
+		$fix->replace = '// ' . $this->find; //Comment it out.
 		
 		// Persist the fix.
 		$this->fixes [] = $fix;
